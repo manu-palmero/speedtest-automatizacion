@@ -2,17 +2,18 @@
 
 # === VERIFICAR DEPENDENCIAS ===
 
-if ! command -v speedtest &> /dev/null; then
+if ! command -v speedtest &>/dev/null; then
     echo "❌ El paquete 'speedtest-cli' no está instalado. Por favor, instálelo con 'sudo apt install speedtest-cli'."
     exit 1
 fi
 
-if ! command -v curl &> /dev/null; then
+if ! command -v curl &>/dev/null; then
     echo "❌ El paquete 'curl' no está instalado. Por favor, instálelo con 'sudo apt install curl'."
     exit 1
 fi
 
 # === FUNCIONES ===
+
 # Función para mostrar el uso del script
 function usage() {
     echo "Uso: $0 -b BOT_TOKEN -c CHAT_ID"
@@ -41,24 +42,28 @@ function enviar_mensaje_telegram() {
 # Configuración de Telegram
 while getopts "b:c:-:h" opt; do
     case $opt in
-        b) BOT_TOKEN="$OPTARG" ;;
-        c) CHAT_ID="$OPTARG" ;;
-        h) 
+    b)
+        BOT_TOKEN="$OPTARG"
+        ;;
+    c)
+        CHAT_ID="$OPTARG"
+        ;;
+    h)
+        usage
+        ;;
+    -)
+        case $OPTARG in
+        help)
             usage
             ;;
-        -)
-            case $OPTARG in
-                help)
-                    usage
-                    ;;
-                *)
-                    error "Opción inválida. Usa -h o --help para ayuda."
-                    ;;
-            esac
-            ;;
-        *) 
+        *)
             error "Opción inválida. Usa -h o --help para ayuda."
             ;;
+        esac
+        ;;
+    *)
+        error "Opción inválida. Usa -h o --help para ayuda."
+        ;;
     esac
 done
 # Verificar que las variables requeridas estén definidas
@@ -69,11 +74,10 @@ fi
 FECHA=$(date +"%Y-%m-%d %H:%M:%S")
 TMP_FILE=$(mktemp /tmp/speedtest_result_XXXXX.txt)
 
-
 # === EJECUCIÓN ===
 
 # Ejecutar speedtest y guardar salida
-if ! speedtest > "$TMP_FILE" 2>&1; then
+if ! speedtest >"$TMP_FILE" 2>&1; then
     ERROR_MSG="❌ Error al ejecutar speedtest.
 
     **Registro del comando**: 
@@ -104,8 +108,7 @@ Realizado desde $(hostname) en la fecha $FECHA
 enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$MESSAGE"
 
 # Eliminar el archivo temporal
-sudo rm -f "$TMP_FILE" 
+sudo rm -f "$TMP_FILE"
 exit 0
 
 # Fin del script
-
