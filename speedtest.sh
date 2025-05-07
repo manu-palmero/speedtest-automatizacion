@@ -74,7 +74,10 @@ TMP_FILE=$(mktemp /tmp/speedtest_result_XXXXX.txt)
 
 # Ejecutar speedtest y guardar salida
 if ! speedtest > "$TMP_FILE" 2>&1; then
-    ERROR_MSG="❌ Error al ejecutar speedtest."
+    ERROR_MSG="❌ Error al ejecutar speedtest.
+
+    **Mensaje de error**: 
+    $(cat "$TMP_FILE")"
     enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$ERROR_MSG"
     exit 1
 fi
