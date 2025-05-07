@@ -106,3 +106,6 @@ enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$MESSAGE"
 # Eliminar el archivo temporal
 sudo rm -f "$TMP_FILE" 
 exit 0
+
+# Fin del script
+
