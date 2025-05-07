@@ -12,6 +12,31 @@ if ! command -v curl &> /dev/null; then
     exit 1
 fi
 
+# === FUNCIONES ===
+# Función para mostrar el uso del script
+function usage() {
+    echo "Uso: $0 -b BOT_TOKEN -c CHAT_ID"
+    echo "  -b BOT_TOKEN   Token del bot de Telegram."
+    echo "  -c CHAT_ID     ID del chat de Telegram."
+    echo "  -h             Mostrar esta ayuda."
+    echo "  --help         Mostrar esta ayuda."
+    exit 0
+}
+# Función para mostrar un mensaje de error y salir
+function error() {
+    echo "❌ $1"
+    exit 1
+}
+# Función para enviar un mensaje a Telegram
+function enviar_mensaje_telegram() {
+    local BOT_TOKEN="$1"
+    local CHAT_ID="$2"
+    local message="$3"
+    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+        -d chat_id="$CHAT_ID" \
+        -d text="$message"
+}
+
 # === VARIABLES ===
 
 # Configuración de Telegram
@@ -20,24 +45,20 @@ while getopts "b:c:-:h" opt; do
         b) BOT_TOKEN="$OPTARG" ;;
         c) CHAT_ID="$OPTARG" ;;
         h) 
-            echo "Uso: $0 -b BOT_TOKEN -c CHAT_ID"
-            exit 0
+            usage
             ;;
         -)
             case $OPTARG in
                 help)
-                    echo "Uso: $0 -b BOT_TOKEN -c CHAT_ID"
-                    exit 0
+                    usage
                     ;;
                 *)
-                    echo "Opción inválida. Usa -h o --help para ayuda."
-                    exit 1
+                    error "Opción inválida. Usa -h o --help para ayuda."
                     ;;
             esac
             ;;
         *) 
-            echo "Opción inválida. Usa -h o --help para ayuda."
-            exit 1
+            error "Opción inválida. Usa -h o --help para ayuda."
             ;;
     esac
 done
@@ -46,7 +67,9 @@ if [[ -z "$BOT_TOKEN" || -z "$CHAT_ID" ]]; then
     echo "❌ Debes proporcionar el BOT_TOKEN y el CHAT_ID. Usa -h o --help para ayuda."
     exit 1
 fi
-TMP_FILE="/tmp/speedtest_result.txt"
+
+TMP_FILE=$(mktemp /tmp/speedtest_result_XXXXX.txt)
+# TMP_FILE="/tmp/speedtest_result.txt"
 
 
 # === EJECUCIÓN ===
@@ -54,10 +77,10 @@ TMP_FILE="/tmp/speedtest_result.txt"
 # Ejecutar speedtest y guardar salida
 if ! speedtest > "$TMP_FILE" 2>&1; then
     ERROR_MSG="❌ Error al ejecutar speedtest."
-    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-        -d chat_id="$CHAT_ID" \
-        -d parse_mode=Markdown \
-        -d text="$ERROR_MSG"
+    enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$ERROR_MSG"
+    # curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+    #     -d chat_id="$CHAT_ID" \
+    #     -d text="$ERROR_MSG"
     exit 1
 fi
 
@@ -68,10 +91,10 @@ UPLOAD=$(grep "Upload" "$TMP_FILE")
 # Si no encontró las líneas, también considerar como error
 if [[ -z "$DOWNLOAD" || -z "$UPLOAD" ]]; then
     ERROR_MSG="⚠️ Speedtest se ejecutó pero no se detectaron resultados válidos."
-    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-        -d chat_id="$CHAT_ID" \
-        -d parse_mode=Markdown \
-        -d text="$ERROR_MSG"
+    enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$ERROR_MSG"
+    # curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+    #     -d chat_id="$CHAT_ID" \
+    #     -d text="$ERROR_MSG"
     exit 1
 fi
 
@@ -81,9 +104,11 @@ $DOWNLOAD
 $UPLOAD"
 
 # Enviar por Telegram
-curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-    -d chat_id="$CHAT_ID" \
-    -d parse_mode=Markdown \
-    -d text="$MESSAGE"
+enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$MESSAGE"
+# curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+#     -d chat_id="$CHAT_ID" \
+#     -d text="$MESSAGE"
 
+# Eliminar el archivo temporal
+sudo rm -f "$TMP_FILE" 
 exit 0
