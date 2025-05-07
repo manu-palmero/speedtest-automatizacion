@@ -67,9 +67,7 @@ if [[ -z "$BOT_TOKEN" || -z "$CHAT_ID" ]]; then
     echo "❌ Debes proporcionar el BOT_TOKEN y el CHAT_ID. Usa -h o --help para ayuda."
     exit 1
 fi
-
 TMP_FILE=$(mktemp /tmp/speedtest_result_XXXXX.txt)
-# TMP_FILE="/tmp/speedtest_result.txt"
 
 
 # === EJECUCIÓN ===
@@ -78,9 +76,6 @@ TMP_FILE=$(mktemp /tmp/speedtest_result_XXXXX.txt)
 if ! speedtest > "$TMP_FILE" 2>&1; then
     ERROR_MSG="❌ Error al ejecutar speedtest."
     enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$ERROR_MSG"
-    # curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-    #     -d chat_id="$CHAT_ID" \
-    #     -d text="$ERROR_MSG"
     exit 1
 fi
 
@@ -92,9 +87,6 @@ UPLOAD=$(grep "Upload" "$TMP_FILE")
 if [[ -z "$DOWNLOAD" || -z "$UPLOAD" ]]; then
     ERROR_MSG="⚠️ Speedtest se ejecutó pero no se detectaron resultados válidos."
     enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$ERROR_MSG"
-    # curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-    #     -d chat_id="$CHAT_ID" \
-    #     -d text="$ERROR_MSG"
     exit 1
 fi
 
@@ -105,9 +97,6 @@ $UPLOAD"
 
 # Enviar por Telegram
 enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$MESSAGE"
-# curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-#     -d chat_id="$CHAT_ID" \
-#     -d text="$MESSAGE"
 
 # Eliminar el archivo temporal
 sudo rm -f "$TMP_FILE" 
