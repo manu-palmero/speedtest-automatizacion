@@ -3,12 +3,12 @@
 # === VERIFICAR DEPENDENCIAS ===
 
 if ! command -v speedtest &> /dev/null; then
-    echo "❌ El paquete 'speedtest-cli' no está instalado. Por favor, instálalo con 'sudo apt install speedtest-cli'."
+    echo "❌ El paquete 'speedtest-cli' no está instalado. Por favor, instálelo con 'sudo apt install speedtest-cli'."
     exit 1
 fi
 
 if ! command -v curl &> /dev/null; then
-    echo "❌ El paquete 'curl' no está instalado. Por favor, instálalo con 'sudo apt install curl'."
+    echo "❌ El paquete 'curl' no está instalado. Por favor, instálelo con 'sudo apt install curl'."
     exit 1
 fi
 
@@ -16,10 +16,9 @@ fi
 # Función para mostrar el uso del script
 function usage() {
     echo "Uso: $0 -b BOT_TOKEN -c CHAT_ID"
-    echo "  -b BOT_TOKEN   Token del bot de Telegram."
-    echo "  -c CHAT_ID     ID del chat de Telegram."
-    echo "  -h             Mostrar esta ayuda."
-    echo "  --help         Mostrar esta ayuda."
+    echo "  -b BOT_TOKEN     Token del bot de Telegram."
+    echo "  -c CHAT_ID       ID del chat de Telegram."
+    echo "  -h o --help      Mostrar esta ayuda."
     exit 0
 }
 # Función para mostrar un mensaje de error y salir
@@ -34,7 +33,7 @@ function enviar_mensaje_telegram() {
     local message="$3"
     curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
         -d chat_id="$CHAT_ID" \
-        -d text="$message"
+        -d text="$message" >/dev/null
 }
 
 # === VARIABLES ===
@@ -93,7 +92,9 @@ fi
 # Armar mensaje final
 MESSAGE="✅ Resultado de Speedtest:
 $DOWNLOAD
-$UPLOAD"
+$UPLOAD
+Realizado desde $(hostname) en la fecha $(date +'%Y-%m-%d %H:%M:%S')
+"
 
 # Enviar por Telegram
 enviar_mensaje_telegram "$BOT_TOKEN" "$CHAT_ID" "$MESSAGE"
