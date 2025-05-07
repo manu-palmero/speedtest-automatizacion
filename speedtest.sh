@@ -66,6 +66,7 @@ if [[ -z "$BOT_TOKEN" || -z "$CHAT_ID" ]]; then
     echo "❌ Debes proporcionar el BOT_TOKEN y el CHAT_ID. Usa -h o --help para ayuda."
     exit 1
 fi
+FECHA=$(date +"%Y-%m-%d %H:%M:%S")
 TMP_FILE=$(mktemp /tmp/speedtest_result_XXXXX.txt)
 
 
@@ -93,7 +94,7 @@ fi
 MESSAGE="✅ Resultado de Speedtest:
 $DOWNLOAD
 $UPLOAD
-Realizado desde $(hostname) en la fecha $(date +'%Y-%m-%d %H:%M:%S')
+Realizado desde $(hostname) en la fecha $FECHA
 "
 
 # Enviar por Telegram
