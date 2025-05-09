@@ -68,8 +68,7 @@ while getopts "b:c:-:h" opt; do
 done
 # Verificar que las variables requeridas estén definidas
 if [[ -z "$BOT_TOKEN" || -z "$CHAT_ID" ]]; then
-    echo "❌ Debes proporcionar el BOT_TOKEN y el CHAT_ID. Usa -h o --help para ayuda."
-    exit 1
+    error "Debes proporcionar el BOT_TOKEN y el CHAT_ID. Usa -h o --help para ayuda."
 fi
 FECHA=$(date +"%Y-%m-%d %H:%M:%S")
 TMP_FILE=$(mktemp /tmp/speedtest_result_XXXXX.txt)
